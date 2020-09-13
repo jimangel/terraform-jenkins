@@ -6,15 +6,19 @@ data "template_file" "default_nginx_test" {
   }
 }
 
+# create new SSH key
+resource "digitalocean_ssh_key" "default" {
+  name       = "Jenkins SSH"
+  public_key = file(var.pub_key)
+}
+
 resource "digitalocean_droplet" "www-jenkins" {
   image              = "ubuntu-18-04-x64"
   name               = "www-jenkins"
   region             = "nyc3"
   size               = "512mb"
   private_networking = true
-  ssh_keys = [
-    var.ssh_fingerprint,
-  ]
+  ssh_keys = [digitalocean_ssh_key.default.fingerprint]
 
   provisioner "file" {
     source      = "install-jenkins.sh"
